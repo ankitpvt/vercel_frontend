@@ -2,29 +2,36 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./index.css";
 
-//const API_URL = "http://localhost:5000/tasks";
-//const API_URL = process.env.VITE_API_URL
-const API_URL = import.meta.env.VITE_API_URL;
-
+const API_URL = import.meta.env.VITE_API_URL; // ✅ Using environment variable
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState("");
 
   useEffect(() => {
-    axios.get(API_URL).then((res) => setTasks(res.data));
+    axios.get(API_URL)
+      .then((res) => setTasks(res.data))
+      .catch((err) => console.error("Error fetching tasks:", err));
   }, []);
 
   const addTask = async () => {
     if (task.trim() === "") return;
-    const res = await axios.post(API_URL, { text: task });
-    setTasks([...tasks, res.data]);
-    setTask("");
+    try {
+      const res = await axios.post(API_URL, { text: task });
+      setTasks([...tasks, res.data]);
+      setTask("");
+    } catch (err) {
+      console.error("Error adding task:", err);
+    }
   };
 
   const deleteTask = async (id) => {
-    await axios.delete(`${API_URL}/${id}`);
-    setTasks(tasks.filter((t) => t._id !== id));
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      setTasks(tasks.filter((t) => t._id !== id));
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
   };
 
   return (
